@@ -42,22 +42,22 @@ function onAccchangedCB(sensorData) {
     var cury=sensorData.y.toFixed(2);
     var curz=sensorData.z.toFixed(2);
     if((curx<3&& curx>-3) && (cury<3&& cury>-3) && prevz>5 && curz<-14){
-    	console.log("Volume down");
+    	console.log("Down");
     	document.getElementById('action').innerHTML ="Volume Down";
     }
     else if((curx<3&& curx>-3) && (cury<3&& cury>-3) && prevz<-16 && curz<-18)
     {
-    	console.log("Volume up");
+    	console.log("Up");
     	document.getElementById('action').innerHTML ="Volume Up";
     }
     else if((curx<3&& curx>-3) && (cury>5) && curz<-12)
     {
-    	console.log("Previous Channel");
+    	console.log("Left");
     	document.getElementById('action').innerHTML ="Previous Channel";
     }
     else if((curx<3&& curx>-3) && (cury<-5) && curz<-12)
     {
-    	console.log("Next Channel");
+    	console.log("Right");
     	document.getElementById('action').innerHTML ="Next Channel";
     }
     document.getElementById('xdat').innerHTML = "x: "+ curx;
