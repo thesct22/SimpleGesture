@@ -6,6 +6,23 @@ console.log("started");
 var prevx=0;
 var prevy=0;
 var prevz=0;
+function onsuccess(dir){
+    console.log(JSON.stringify(dir));
+}
+
+function onerror(e){
+	console.log("error"+e.message);
+}
+
+function onsuccessPermission(){
+	console.log("Success");
+	tizen.filesystem.resolve("/mnt/logfiles/log.txt", onsuccess, onerror, "rw");
+}
+
+function onErrorPermission(e){
+	console.log("error "+ JSON.stringify(e));
+}
+
 function onAccGetSuccessCB(sensorData)
 {
   console.log("######## Get acceleration sensor data ########");
@@ -29,36 +46,43 @@ function onerrorCB(error)
 function onAccsuccessCB()
 {
   console.log("Acceleration sensor start");
+  tizen.ppm.requestPermission("http://tizen.org/privilege/mediastorage", onsuccessPermission, onErrorPermission);
   accelerationSensor.getAccelerationSensorData(onAccGetSuccessCB, onerrorCB);
-
 }
 
 function onAccchangedCB(sensorData) {
 //    console.log('Accelerometer sensor data: ');
 //    console.log("x: " + sensorData.x);
 //    console.log("y: " + sensorData.y);
-//   console.log("z: " + sensorData.z);
+	console.log("z: " + sensorData.z);
     var curx=sensorData.x.toFixed(2);
     var cury=sensorData.y.toFixed(2);
     var curz=sensorData.z.toFixed(2);
+    var tmstp=new Date().getTime();
+    var gstr= " ";
+    
     if((curx<3&& curx>-3) && (cury<3&& cury>-3) && prevz>5 && curz<-14){
     	console.log("Down");
-    	document.getElementById('action').innerHTML ="Volume Down";
+    	document.getElementById('action').innerHTML ="Down";
+    	gstr="Down";
     }
     else if((curx<3&& curx>-3) && (cury<3&& cury>-3) && prevz<-16 && curz<-18)
     {
     	console.log("Up");
-    	document.getElementById('action').innerHTML ="Volume Up";
+    	document.getElementById('action').innerHTML ="Up";
+    	gstr="Up";
     }
     else if((curx<3&& curx>-3) && (cury>5) && curz<-12)
     {
     	console.log("Left");
-    	document.getElementById('action').innerHTML ="Previous Channel";
+    	document.getElementById('action').innerHTML ="Left";
+    	gstr="Left";
     }
     else if((curx<3&& curx>-3) && (cury<-5) && curz<-12)
     {
     	console.log("Right");
-    	document.getElementById('action').innerHTML ="Next Channel";
+    	document.getElementById('action').innerHTML ="Right";
+    	gstr="Right";
     }
     document.getElementById('xdat').innerHTML = "x: "+ curx;
     document.getElementById('ydat').innerHTML = "y: "+ cury;
@@ -66,6 +90,19 @@ function onAccchangedCB(sensorData) {
     prevx=curx;
     prevy=cury;
     prevz=curz;
+    tizen.filesystem.resolve("documents", function(dir) {
+  	  var file = dir.resolve("logfile.txt");
+  	  console.log(JSON.stringify(file));
+  	  file.openStream(
+  		         "a",
+  		         function(fs) {
+  		           fs.write(curx+","+cury+","+curz+","+tmstp+","+gstr+";");
+  		           fs.close();
+  		         }, function(e) {
+  		           console.log("Error " + e.message);
+  		         }, "UTF-8"
+  		     );
+    }, onerror, "rw");
 }
 
 window.onload = function () {
